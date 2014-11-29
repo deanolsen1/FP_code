@@ -5,36 +5,35 @@ $(document).ready(function() {
 	var cities;
 	var map = L.map('map', {
 			zoomControl:false,
-			center: [48.8693566, 2.3577662],
+			center: [48.873, 2.3577662],
 			
-			zoom: 10,
-			minZoom: 9,
-			maxZoom: 16,
+			zoom: 15,
+			minZoom: 12,
+			maxZoom: 20,
 		
 		});
 
 	L.tileLayer(
 		'http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-			attribution: 'Acetate tileset from GeoIQ' + '<br>'+'Created By: Adam Gile'
+			attribution: 'Acetate tileset from OSM' + '<br>'+'Created By: Adam Gile'
 	}).addTo(map);
 
 //code bank 7&9&12
-	$.getJSON("data/Locations3.geojson")
+	$.getJSON("data/Locationsv4.geojson")
 		.done(function(data)  {
 			
-			// var info = processData(data);
-			// createPropSymbols(info.timestamps, data);
-			// createLegend(info.min,info.max);
-			// createSliderUI(info.timestamps);
-			// //createZoomslider()
+		var info = processData(data);
+		//createPropSymbols(info.timestamps, data);
+		//createLegend(info.min,info.max);
+		//createSliderUI(info.timestamps);
+		//createZoomslider()
 			var points = L.geoJson(data, {
-				onEachFeature: function(feature, layer){
-					layer.bindPopup(feature.properties.Address)
+				onEachFeature: function (features, layer) {
+					layer.bindPopup("SM: <b>" + features.properties.SM + "</b><br>" +features.properties.Address + "<br> Page " +features.properties.Page) 
 				}
 			}).addTo(map);
 		})
 		.fail(function()  {alert("There has been a problem loading the data.")});
-
 
 
 //CB18
@@ -86,12 +85,6 @@ function createTemporalLegend(startTimestamp){
 //End CB20
 
 
-
-
-
-
-
-
 function createPropSymbols(timestamps, data) {
 	cities = L.geoJson(data, {
 
@@ -134,14 +127,15 @@ function updatePropSymbols(timestamp) {
 		
 		var props = layer.feature.properties;
 		var radius = calcPropRadius(props[timestamp]);
-		var popupContent = "<b>" +timestamp   +"Sufficiency Rating"+"<br>"+ 
+		/*var popupContent = "<b>" + timestamp + "<br>"+ 
 				String(props[timestamp]) +"</b><br>" +
-				"<i>" + props.BRIDGE_ID + "<br>"+"</i>";
+				"<i>" + SM +"<br>"+"</i>";*/
 
 			layer.setRadius(radius);
 			layer.bindPopup(popupContent, {offset: new L.Point(0,-radius) });
 		});
 }
+
 
 
 
@@ -152,17 +146,6 @@ function calcPropRadius(attributeValue) {
 	return Math.sqrt(area/Math.PI)*2;
 }
 //end CB13
-
-
-
-
-
-
-
-
-
-
-
 
 	function createLegend(min, max) {
 
@@ -250,11 +233,21 @@ function processData(data) {
 
 		for (var attribute in properties) {
 
-			if( attribute != 'OBJECTID_12' &&
+/*			if( attribute != 'OBJECTID_12' &&
 				attribute != 'BRIDGE_ID' &&
 				attribute != 'AGENCY' &&
 				attribute != 'CNST_YR' &&
-				attribute != 'Age' ) 
+				attribute != 'Age' ) */
+			if( attribute != "SM" &&
+				attribute != "Address" &&
+				attribute != "Page" &&
+				attribute != "City" &&
+				attribute != "Country" &&
+				attribute != "Latitude" &&
+				attribute != "Longitude")
+				//attribute != 'CNST_YR' &&
+				//attribute != 'Age' ) 
+			
 			{
 				if ( $.inArray(attribute,timestamps) === -1) {
 					timestamps.push(attribute);
@@ -273,6 +266,8 @@ function processData(data) {
 
 	return {
 		timestamps : timestamps,
+//		SM : SM,
+//		Page : Page,
 		min : min,
 		max : max
 			}
